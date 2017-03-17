@@ -1,3 +1,30 @@
+#!/usr/bin/env python
+import json
+
+FLUFF = [
+    'with',
+    'should',
+    'not',
+    'should',
+    'for',
+    'be',
+    'that',
+    'have',
+    'a',
+    'the',
+]
+
+def smartSplit(s):
+  s = s.split()
+  ret = []
+  cur = []
+  for word in s:
+    cur.append(word)
+    if word not in FLUFF:
+      ret.append(' '.join(cur))
+      cur = []
+  return ret
+      
 class Node(object):
   def __init__(self):
     self.children = {}
@@ -36,9 +63,10 @@ class Node(object):
 
     return root
 
-  def _merge(self):
-    if len(self.children) == 1:
-      k, child = self.children.items()[0]
+  def count(self):
+    ret = sum([child.count() for child in self.children.values()])
+    if self.value: ret += 1
+    return ret
 
   def dump(self, indent=0):
     if self.value:
@@ -47,13 +75,31 @@ class Node(object):
       print '{}{}'.format(' '*indent, c)
       self.children[c].dump(indent+1)
 
+  def dumph(self, indent=0):
+    if self.value:
+      print '{}<i>{}</i>'.format(' '*indent, self.value)
+    if self.children:
+      if indent == 0:
+        print '{}<ul id="the_list">'.format(' '*indent)
+      else:
+        print '{}<ul>'.format(' '*indent)
+      for c in sorted(self.children):
+        print '{}<li>'.format(' '*indent)
+        print '{}{} - {}'.format(' '*indent, c, self.children[c].count())
+        self.children[c].dumph(indent+1)
+        print '{}</li>'.format(' '*indent)
+      print '{}</ul>'.format(' '*indent)
+
+  def walkKeys(self, fcn):
+    for c in self.children:
+      fcn(c)
+      self.children[c].walkKeys(fcn)
+
 def createPrefixTree(m):
   root = Node()
   for s in m:
-    root.insert(s.split(), m[s])
+    root.insert(smartSplit(s), m[s])
   return root
-
-import json
 
 T = {}
 line = 0
@@ -70,5 +116,31 @@ for tn in tns:
   T[tn] = line
   line += 1
 
+singletons = set()
+def collectSingleton(name):
+  if len(name.split()) == 1:
+    singletons.add(name)
+
+print """
+<!DOCTYPE HTML>
+<head></head>
+<body>
+"""
+
 root = createPrefixTree(T).optimize()
-root.dump()
+root.dumph()
+root.walkKeys(collectSingleton)
+
+print '<hr>'
+print '<ul>'
+for sing in singletons:
+  print '<li>{}</li>'.format(sing)
+print '</ul>'
+
+print """
+<script src="col.js"></script>
+<script>
+CollapsibleLists.applyTo(document.getElementById('the_list'));
+</script>
+</body>
+"""
