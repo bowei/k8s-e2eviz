@@ -1,26 +1,8 @@
 'use strict';
 
-class TreeNode {
-    constructor(id, desc, parent) {
-        this.id = id;
-        this.desc = desc;
-        this.children = {};
-        this.prop = {};
-        this.parent = parent;
-    }
-
-    addChild(label, child) {
-        this.children[label] = child;
-    }
-
-    setProp(key, value) {
-        this.prop[key] = value;
-    }
-}
-
 // TestGroup is a collection of one or more related tests.
-// 
-// Build status for across a series of environments. 
+//
+// Build status for across a series of environments.
 class TestGroup {
 
 }
@@ -39,14 +21,19 @@ class TestResult {
 }
 
 class TestReport {
-    constructor(runId, startTs, endTs, commit, failed, passed, other) {
+    constructor(runId, startTs, endTs, commit, passed, failed, other) {
         this.runId = runId;
         this.startTs = startTs;
         this.endTs = endTs;
         this.commit = commit;
-        this.failed = failed;
         this.passed = passed;
+        this.failed = failed;
         this.other = other;
+    }
+
+    status() {
+        return Math.round(
+            this.passed / (this.failed + this.passed + this.other)*9) | 0;
     }
 }
 
@@ -55,7 +42,6 @@ class AggregateTestResult {
     constructor(key, run, tests, job) {
         this.key = key;
 
-        this.run = run;
         this.tests = tests;
         this.job = job;
 
@@ -67,10 +53,9 @@ class AggregateTestResult {
         return this;
     }
 
-    toRow() {
+    asHTMLRow() {
         var tr = $('<tr>');
         tr.append($('<td>').html(this.key));
-        tr.append($('<td>').html(this.run));
         tr.append($('<td>').html(this.job));
         tr.append($('<td>').html('<img src="http://placehold.it/200x40"/>').addClass('timeline-graph'));
 
@@ -78,89 +63,100 @@ class AggregateTestResult {
             return r.commit;
         }
 
-        var addGroup = (group, rg) => {
-            var td = $('<td>').addClass('timeline-cell-group');
+        var addGroup = (td, group, rg) => {
+            var groupDiv = $('<div>').addClass('timeline-cell-group');
+            td.append(groupDiv);
+
             var div = $('<div>');
-            td.append(div);
+            groupDiv.append(div);
+
             for (var i=0; i<rg.length; ++i) {
                 div.append(
                     $('<div>')
                         .html('&block;')
-                        .addClass('timeline-cell-block'));
+                        .addClass('timeline-cell-block')
+                        .addClass('timeline-cell-block-'+rg[i].status()));
             }
-            var div = $('<div>').html(group).addClass('timeline-cell-label');
-            td.append(div);
 
-            tr.append(td);
+            var div = $('<div>').html(group).addClass('timeline-cell-label');
+            groupDiv.append(div);
         }
 
         // XXX/bowei -- sort reverse
         var group = groupFn(this.reports[0]);
         var reportGroup = [this.reports[0]];
 
+        var td = $('<td>').addClass('timeline-td');
+        tr.append(td);
+
         for (var i=1; i<this.reports.length; ++i) {
             var report = this.reports[i];
             if (groupFn(report) !== group) {
-                addGroup(group, reportGroup);
+                addGroup(td, group, reportGroup);
                 reportGroup = [];
-                group = groupFn(report);          
+                group = groupFn(report);
             }
             reportGroup.push(report);
         }
 
         if (reportGroup.length > 0) {
-            addGroup(group, reportGroup);
+            addGroup(td, group, reportGroup);
         }
 
         return tr;
     }
 }
 
-// BuildStatus is the pass/failure for a given TestGroup for an interval of time
-// across a 
-class BuildStatus {
-    //
-    // start timestamp
-    // end timestamp
+class BuildReport {
     constructor(testGroup, start, end) {
         this.testGroup = testGroup;
         this.start = start;
         this.end = end;
+        this.testResults = []
     }
 
-    addTestResult() {
+    addTestResult(result) {
+        this.testResults.push(result);
+    }
 
+    asHTMLTable() {
+        var table = $('<table>').addClass('results');
+        table.attr('id', 'results');
+
+        var headerTR = $('<tr>');
+        ['key', 'job', 'graph', 'result'].forEach((v) => {
+            headerTR.append($('<th>').html(v));
+        });
+        table.append(headerTR);
+
+        this.testResults.forEach((tr) => {
+            table.append(tr.asHTMLRow());
+        });
+
+        return table;
     }
 }
 
-var ar = new AggregateTestResult('agg1', 'run1', [], 'job1');
-ar.addReport(new TestReport(1, 0, 0, 'commit1', 5, 7, 3));
-ar.addReport(new TestReport(2, 0, 0, 'commit1', 5, 7, 3));
-ar.addReport(new TestReport(2, 0, 0, 'commit1', 5, 7, 3));
-ar.addReport(new TestReport(3, 0, 0, 'commit2', 5, 7, 3));
-ar.addReport(new TestReport(3, 0, 0, 'commit2', 5, 7, 3));
-ar.addReport(new TestReport(3, 0, 0, 'commit2', 5, 7, 3));
-ar.addReport(new TestReport(3, 0, 0, 'commit2', 5, 7, 3));
-ar.addReport(new TestReport(3, 0, 0, 'commit2', 5, 7, 3));
-ar.addReport(new TestReport(3, 0, 0, 'commit2', 5, 7, 3));
-ar.addReport(new TestReport(3, 0, 0, 'commit2', 5, 7, 3));
-ar.addReport(new TestReport(3, 0, 0, 'commit2', 5, 7, 3));
-ar.addReport(new TestReport(4, 0, 0, 'commit3', 5, 7, 3));
-ar.addReport(new TestReport(4, 0, 0, 'commit3', 5, 7, 3));
-ar.addReport(new TestReport(4, 0, 0, 'commit3', 5, 7, 3));
+var br = new BuildReport('testGroup', 0, 0);
 
-$('#testTable').append(ar.toRow());
+for (var i=0; i<10; ++i) {
+    var ar = new AggregateTestResult('agg'+i, 'run'+i, [], 'job'+i);
+    var idx = 0;
 
-var ar = new AggregateTestResult('agg2', 'run1', [], 'job1');
-ar.addReport(new TestReport(1, 0, 0, 'commit1', 5, 7, 3));
-ar.addReport(new TestReport(2, 0, 0, 'commit1', 5, 7, 3));
-ar.addReport(new TestReport(2, 0, 0, 'commit1', 5, 7, 3));
-ar.addReport(new TestReport(3, 0, 0, 'commit2', 5, 7, 3));
-ar.addReport(new TestReport(3, 0, 0, 'commit2', 5, 7, 3));
-ar.addReport(new TestReport(3, 0, 0, 'commit2', 5, 7, 3));
-ar.addReport(new TestReport(3, 0, 0, 'commit2', 5, 7, 3));
+    var resultCount = 40+Math.random()*10;
+    for (var j=0; j<resultCount; ++j) {
+        if (Math.random() > 0.9) {
+            idx += 1;
+        }
 
-$('#testTable').append(ar.toRow());
+        var report = new TestReport(j, 0, 0, 'commit'+idx,
+            Math.random()*30 | 0,
+            Math.random()*5 | 0,
+            Math.random()*5 | 0);
+        ar.addReport(report);
+    }
 
-var tn = new TreeNode(10, 'root', null);
-console.log(tn);
+    br.addTestResult(ar);
+}
+
+$('#contentRegion').append(br.asHTMLTable());

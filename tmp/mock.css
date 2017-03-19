@@ -8,20 +8,36 @@ div#topBar {
 }
 
 div#browserRegion {
-    height: 35%;
+    height: 30%;
     background-color: #0dd;
     overflow: scroll;
     border-bottom: solid 2px;
 }
 
 div#contentRegion {
-    height: 65%;
+    height: 70%;
     background-color: #dd0;
     overflow: scroll;
 }
 
+#results {
+    background-color: #95a;
+}
+
+#results tr:nth-child(even) {
+    background-color: #0f0;
+}
+
+#results tr:nth-child(odd) {
+    background-color: #0ff;    
+}
+
 .timeline-graph {
     padding: 0;
+}
+
+.timeline-td {
+    white-space: nowrap;
 }
 
 .timeline-cell-group {
@@ -38,6 +54,46 @@ div#contentRegion {
 .timeline-cell-block {
     display: inline-block;
     padding: 2px;
+}
+
+.timeline-cell-block-0 { 
+    color: #f00;
+}
+
+.timeline-cell-block-1 { 
+    color: #f30;
+}
+
+.timeline-cell-block-2 { 
+    color: #f50;
+}
+
+.timeline-cell-block-3 { 
+    color: #f80;
+}
+
+.timeline-cell-block-4 { 
+    color: #fa0;
+}
+
+.timeline-cell-block-5 { 
+    color: #fc0;
+}
+
+.timeline-cell-block-6 { 
+    color: #fd0;
+}
+
+.timeline-cell-block-7 { 
+    color: #ff0;
+}
+
+.timeline-cell-block-8 { 
+    color: #af0;
+}
+
+.timeline-cell-block-9 { 
+    color: #0f0;
 }
 
 .timeline-cell-label {
