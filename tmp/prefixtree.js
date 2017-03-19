@@ -15,8 +15,8 @@ class Node {
 
     // walk(parent, node)
     walk(fn) {
-        fn(this.parent, this);
-        this.children.forEach((value, key) => {
+        fn(this);
+        this.children.forEach((value) => {
             value.walk(fn);
         });
     }
@@ -67,7 +67,27 @@ class Node {
             .addClass('browser-tree-label'))
             .toggle());
 
-        li.dblclick((event) => {
+        if (this.children.size > 0) {
+            var view = $('<div>').html('[view]').addClass('browser-tree-item-view');
+            li.append(view);
+            view.click(() => {
+                console.log('view', this);
+                return false;
+            });
+        }
+
+        if (this.data) {
+            var data = $('<div>').addClass('browser-tree-item-data');
+            li.append(data);
+            data.html('[data]');
+
+            data.click(() => {
+                console.log('data', this);
+                return false;
+            });
+        }
+
+        li.click((event) => {
             this.children.forEach((value) => {
                 value.li.toggle('fast');
             });
@@ -161,18 +181,3 @@ function splitTestDescription(desc) {
 
     return ret;
 }
-
-var pt = new PrefixTree();
-
-for (var i=0; i<50; ++i) {
-    var pathLen = Math.random() * 5 | 0 + 5;
-    var path = []
-    for (var k=0; k<pathLen; ++k) {
-        path.push(['a', 'b', 'c', 'd'][Math.random() * 4 | 0]);
-    }
-    pt.add(path, 'xxx'+i);
-}
-
-pt.optimize();
-
-$('#browserRegion').append(pt.asHTMLUL());

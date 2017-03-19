@@ -1,26 +1,6 @@
 'use strict';
 
-// TestGroup is a collection of one or more related tests.
-//
-// Build status for across a series of environments.
-class TestGroup {
-
-}
-
-// TestResult is the result of a single test run for a single atomic test.
-// status is one of 'pass', 'fail', 'other'
 class TestResult {
-    constructor(testName, job, commit, startTs, endTs, status) {
-        this.testName = testName;
-        this.job = job;
-        this.commit = commit;
-        this.startTs = startTs;
-        this.endTs = endTs;
-        this.status = status;
-    }
-}
-
-class TestReport {
     constructor(runId, startTs, endTs, commit, passed, failed, other) {
         this.runId = runId;
         this.startTs = startTs;
@@ -39,7 +19,7 @@ class TestReport {
 
 // Aggregates several tests from the same run, job and commit hash together.
 class AggregateTestResult {
-    constructor(key, run, tests, job) {
+    constructor(key, tests, job) {
         this.key = key;
 
         this.tests = tests;
@@ -107,7 +87,7 @@ class AggregateTestResult {
     }
 }
 
-class BuildReport {
+class TestReport {
     constructor(testGroup, start, end) {
         this.testGroup = testGroup;
         this.start = start;
@@ -136,27 +116,3 @@ class BuildReport {
         return table;
     }
 }
-
-var br = new BuildReport('testGroup', 0, 0);
-
-for (var i=0; i<10; ++i) {
-    var ar = new AggregateTestResult('agg'+i, 'run'+i, [], 'job'+i);
-    var idx = 0;
-
-    var resultCount = 40+Math.random()*10;
-    for (var j=0; j<resultCount; ++j) {
-        if (Math.random() > 0.9) {
-            idx += 1;
-        }
-
-        var report = new TestReport(j, 0, 0, 'commit'+idx,
-            Math.random()*30 | 0,
-            Math.random()*5 | 0,
-            Math.random()*5 | 0);
-        ar.addReport(report);
-    }
-
-    br.addTestResult(ar);
-}
-
-$('#contentRegion').append(br.asHTMLTable());

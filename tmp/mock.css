@@ -37,8 +37,21 @@ div#contentRegion {
     background-color: #5f9;
 }
 
+.browser-tree-label {
+    display: inline-block;
+}
 .browser-tree-item:hover {
     background-color: #afa;
+}
+
+.browser-tree-item-view {
+    background-color: #aca;
+    display: inline-block;
+}
+
+.browser-tree-item-data {
+    background-color: #cac;
+    display: inline-block;
 }
 
 #results {
