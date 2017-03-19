@@ -4,6 +4,8 @@ class Node {
         this.label = label;
         this.parent = null;
         this.data = null;
+
+        this.li = null;
     }
 
     addChild(label, child) {
@@ -11,10 +13,26 @@ class Node {
         this.children.set(label, child);
     }
 
+    // walk(parent, node)
     walk(fn) {
         fn(this.parent, this);
         this.children.forEach((value, key) => {
             value.walk(fn);
+        });
+    }
+
+    // fn (val, node): val
+    fold(val, fn) {
+        val = fn(val, this);
+        this.children.forEach((node) => {
+            val = node.fold(val, fn);
+        });
+        return val;
+    }
+
+    size() {
+        return this.fold(0, (val, node) => {
+            return val + (node.data ? 1 : 0);
         });
     }
 
@@ -38,8 +56,25 @@ class Node {
     }
 
     asHTMLLI() {
-        var li = $('<li>').addClass('browser-tree-item').append(
-            $('<div>').html(this.label).addClass('browser-tree-label'));
+        var label = this.label;
+        if (this.size() > 1) {
+            label +=  ' (items ' + this.size() + ')';
+        }
+
+        var li = ($('<li>').addClass('browser-tree-item')
+            .append($('<div>')
+            .html(label)
+            .addClass('browser-tree-label'))
+            .toggle());
+
+        li.dblclick((event) => {
+            this.children.forEach((value) => {
+                value.li.toggle('fast');
+            });
+            return false;
+        });
+
+        this.li = li;
 
         if (this.children.size > 0) {
             var ul = $('<ul>').addClass('browser-tree-child-list');
@@ -50,7 +85,10 @@ class Node {
     }
 
     addChildrenLI(ul) {
-        this.children.forEach((v, k) => {
+        Array.from(this.children.keys()).sort((a, b) => {
+            return a.localeCompare(b);
+        }).forEach((label) => {
+            var v = this.children.get(label);
             ul.append(v.asHTMLLI());
         })
         return ul;
@@ -86,7 +124,12 @@ class PrefixTree {
     }
 
     asHTMLUL() {
-        return this.root.addChildrenLI($('<ul>')).addClass('browser-tree-top-list');
+        var ul = $('<ul>');
+        this.root.addChildrenLI(ul).addClass('browser-tree-top-list');
+        this.root.children.forEach((v) => {
+            v.li.toggle();
+        })
+        return ul;
     }
 }
 
