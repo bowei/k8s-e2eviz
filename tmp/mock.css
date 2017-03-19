@@ -4,7 +4,7 @@ html, body {
 }
 
 div#topBar {
-    background-color: #4f9;
+    background-color: #1f4;
 }
 
 div#browserRegion {
@@ -18,6 +18,27 @@ div#contentRegion {
     height: 70%;
     background-color: #dd0;
     overflow: scroll;
+}
+
+.browser-tree-top-list {
+    list-style-type: none;
+    background-color: #97f;
+    margin: 0;
+    padding-left: 5px;
+}
+
+.browser-tree-child-list {
+    list-style-type: none;
+    background-color: #f79;
+}
+
+.browser-tree-item {
+    list-style-type: none;
+    background-color: #5f9;
+}
+
+.browser-tree-item:hover {
+    background-color: #afa;
 }
 
 #results {

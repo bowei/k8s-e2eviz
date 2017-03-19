@@ -18,17 +18,16 @@ class Node {
         });
     }
 
+    // optimize reduces the size and depth of the tree.
+    // - removes singleton children.
     optimize() {
-        console.log('optimize', this);
-
-        
         this.children.forEach((value) => {
             value.optimize();
         })
 
         if (this.children.size == 1 && !this.data && this.parent) {
             var child = Array.from(this.children.values())[0];
-            console.log('optimize child', child);
+
             this.parent.children.delete(this.label);
             // Pull the child node into this node.
             this.children = child.children;
@@ -36,6 +35,25 @@ class Node {
             this.parent.children.set(this.label, this);
             this.data = child.data;
         }
+    }
+
+    asHTMLLI() {
+        var li = $('<li>').addClass('browser-tree-item').append(
+            $('<div>').html(this.label).addClass('browser-tree-label'));
+
+        if (this.children.size > 0) {
+            var ul = $('<ul>').addClass('browser-tree-child-list');
+            this.addChildrenLI(ul);
+            li.append(ul);
+        }
+        return li;
+    }
+
+    addChildrenLI(ul) {
+        this.children.forEach((v, k) => {
+            ul.append(v.asHTMLLI());
+        })
+        return ul;
     }
 }
 
@@ -65,6 +83,10 @@ class PrefixTree {
 
     optimize() {
         this.root.optimize();
+    }
+
+    asHTMLUL() {
+        return this.root.addChildrenLI($('<ul>')).addClass('browser-tree-top-list');
     }
 }
 
@@ -97,19 +119,17 @@ function splitTestDescription(desc) {
     return ret;
 }
 
-console.log(splitTestDescription('a common be should bold'));
-
 var pt = new PrefixTree();
-pt.add(['a', 'b', 'x'], 'xxx');
-pt.add(['a', 'b', 'y'], 'yyy');
-pt.add(['d', 'e'], 'zzz');
 
-pt.walk((parent, node) => {
-    console.log('walk', node);
-});
+for (var i=0; i<50; ++i) {
+    var pathLen = Math.random() * 5 | 0 + 5;
+    var path = []
+    for (var k=0; k<pathLen; ++k) {
+        path.push(['a', 'b', 'c', 'd'][Math.random() * 4 | 0]);
+    }
+    pt.add(path, 'xxx'+i);
+}
 
 pt.optimize();
-console.log('---');
-pt.walk((parent, node) => {
-    console.log('walk', node);
-});
+
+$('#browserRegion').append(pt.asHTMLUL());
