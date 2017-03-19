@@ -25,7 +25,9 @@ function makeTestReport(prefix) {
 
 	// filter by test prefix, group by job
 	DATA.forEach((row) => {
-		if (! row.test.startsWith(prefix)) { return; }
+		testName = row.test.split(/\s+/).join(' ');
+
+		if (! testName.startsWith(prefix)) { return; }
 		if (! results.has(row.job)) {
 			results.set(row.job, new AggregateTestResult(row.job, [], row.job));
 		}
@@ -58,6 +60,11 @@ function makeTestReport(prefix) {
 function showReport(prefix) {
 	console.log('showReport', prefix);
 	$('#contentRegion').html('');
+
+	if (prefix !== '') {
+		$('#contentRegion').append($('<h3>').html('Report for /'+prefix+'/'));
+	}
+
 	$('#contentRegion').append(makeTestReport(prefix).asHTMLTable());
 }
 

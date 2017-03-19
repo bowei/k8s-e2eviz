@@ -22,19 +22,19 @@ div#contentRegion {
 
 .browser-tree-top-list {
     list-style-type: none;
-    background-color: #97f;
+    background-color: #fff;
     margin: 0;
     padding-left: 5px;
 }
 
 .browser-tree-child-list {
     list-style-type: none;
-    background-color: #f79;
+    background-color: #fff;
 }
 
 .browser-tree-item {
     list-style-type: none;
-    background-color: #5f9;
+    background-color: #fff;
 }
 
 .browser-tree-label {

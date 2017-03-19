@@ -32,6 +32,7 @@ class Node {
 
     prefix() {
 	    var prefix = this.label;
+
 	    var cur = this.parent;
 	    while (cur && cur.label) {
 		    prefix = cur.label + ' ' + prefix;
@@ -57,9 +58,14 @@ class Node {
             var child = Array.from(this.children.values())[0];
 
             this.parent.children.delete(this.label);
+
             // Pull the child node into this node.
             this.children = child.children;
-            this.label += (' ' + child.label);
+	    this.children.forEach((v) => {
+	        v.parent = this;
+	    });
+
+            this.label = this.label + ' ' + child.label;
             this.parent.children.set(this.label, this);
             this.data = child.data;
         }
