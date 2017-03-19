@@ -1,47 +1,64 @@
 
 var pt = new PrefixTree();
 
-/*
-for (var i=0; i<50; ++i) {
-    var pathLen = Math.random() * 5 | 0 + 5;
-    var path = []
-    for (var k=0; k<pathLen; ++k) {
-        path.push(['a', 'b', 'c', 'd'][Math.random() * 4 | 0]);
-    }
-    pt.add(path, 'xxx'+i);
-}
-*/
+var allTests = new Set();
 
-TESTS.forEach((v) => {
-    if (v.test_name && v.test_name.startsWith('[k8s.io]')) {
-        pt.add(splitTestDescription(v.test_name), v.test_name);
+DATA.forEach((v) => {
+	if (allTests.has(v.test)) { return; }
+	allTests.add(v.test);
+});
+
+allTests.forEach((v) => {
+    if (v && v.startsWith('[k8s.io]')) {
+        pt.add(splitTestDescription(v), v);
     }
 });
 
 pt.optimize();
 $('#browserRegion').append(pt.asHTMLUL());
 
+function makeTestReport(prefix) {
+	var br = new TestReport('testGroup', 0, 0);
+	
+	// job -> [tests]
+	var results = new Map();
 
-var br = new TestReport('testGroup', 0, 0);
+	// filter by test prefix, group by job
+	DATA.forEach((row) => {
+		if (! row.test.startsWith(prefix)) { return; }
+		if (! results.has(row.job)) {
+			results.set(row.job, new AggregateTestResult(row.job, [], row.job));
+		}
 
-for (var i=0; i<30; ++i) {
-    var ar = new AggregateTestResult('agg'+i, [], 'job'+i);
-    var idx = 0;
+		var agg = results.get(row.job);
+		var tr;
+		if (agg.reports.length == 0 || agg.reports[agg.reports.length-1].runId != row.runId) {
+			tr = new TestResult(row.runId, row.startTs, row.endTs, row.commit, 0, 0, 0);
+			agg.addReport(tr);
+		} else {
+			tr = agg.reports[agg.reports.length-1];
+		}
 
-    var resultCount = 40+Math.random()*10;
-    for (var j=0; j<resultCount; ++j) {
-        if (Math.random() > 0.9) {
-            idx += 1;
-        }
+		if (row.passed === 'true') {
+			tr.passed += 1;
+		} else if (row.passed === 'false') {
+			tr.failed += 1;
+		} else {
+			tr.other += 1;
+		}
+	});
 
-        var report = new TestResult(j, 0, 0, 'commit'+idx,
-            Math.random()*30 | 0,
-            Math.random()*5 | 0,
-            Math.random()*5 | 0);
-        ar.addReport(report);
-    }
+	results.forEach((v, k) => {
+		br.addTestResult(v);
+	});
 
-    br.addTestResult(ar);
+	return br;
 }
 
-$('#contentRegion').append(br.asHTMLTable());
+function showReport(prefix) {
+	console.log('showReport', prefix);
+	$('#contentRegion').html('');
+	$('#contentRegion').append(makeTestReport(prefix).asHTMLTable());
+}
+
+showReport('');

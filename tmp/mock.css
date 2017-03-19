@@ -59,11 +59,11 @@ div#contentRegion {
 }
 
 #results tr:nth-child(even) {
-    background-color: #0f0;
+    background-color: #eee;
 }
 
 #results tr:nth-child(odd) {
-    background-color: #0ff;    
+    background-color: #ddd;    
 }
 
 .timeline-graph {

@@ -39,6 +39,12 @@ class AggregateTestResult {
         tr.append($('<td>').html(this.job));
         tr.append($('<td>').html('<img src="http://placehold.it/200x40"/>').addClass('timeline-graph'));
 
+	if (this.reports.length == 0) {
+		// XXX
+		tr.append($('<td>').html('no tests reported'));
+		return tr;
+	}
+
         var groupFn = (r) => {
             return r.commit;
         }
@@ -92,11 +98,12 @@ class TestReport {
         this.testGroup = testGroup;
         this.start = start;
         this.end = end;
-        this.testResults = []
+        this.testResults = new Map();
     }
 
     addTestResult(result) {
-        this.testResults.push(result);
+	// XXX/bowei -- clobber
+        this.testResults.set(result.job, result);
     }
 
     asHTMLTable() {
@@ -109,9 +116,15 @@ class TestReport {
         });
         table.append(headerTR);
 
-        this.testResults.forEach((tr) => {
-            table.append(tr.asHTMLRow());
+	    /*
+        this.testResults.forEach((agg) => {
+            table.append(agg.asHTMLRow());
         });
+	*/
+
+	Array.from(this.testResults.keys()).sort().forEach((key) => {
+		table.append(this.testResults.get(key).asHTMLRow());
+	});
 
         return table;
     }

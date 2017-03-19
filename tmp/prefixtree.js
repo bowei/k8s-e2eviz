@@ -30,6 +30,16 @@ class Node {
         return val;
     }
 
+    prefix() {
+	    var prefix = this.label;
+	    var cur = this.parent;
+	    while (cur && cur.label) {
+		    prefix = cur.label + ' ' + prefix;
+		    cur = cur.parent;
+	    }
+	    return prefix;
+    }
+
     size() {
         return this.fold(0, (val, node) => {
             return val + (node.data ? 1 : 0);
@@ -72,6 +82,8 @@ class Node {
             li.append(view);
             view.click(() => {
                 console.log('view', this);
+	        // XXX
+		showReport(this.prefix());
                 return false;
             });
         }
@@ -117,7 +129,7 @@ class Node {
 
 class PrefixTree {
     constructor() {
-        this.root = new Node(-1, 'root');
+        this.root = new Node(null, 'root');
     }
 
     // fn : (Node parent, string, Node)
