@@ -2,16 +2,15 @@
 import json
 
 FLUFF = [
-    'with',
-    'should',
+    'a',
+    'be',
+    'for',
+    'have',
     'not',
     'should',
-    'for',
-    'be',
     'that',
-    'have',
-    'a',
     'the',
+    'with',
 ]
 
 def smartSplit(s):
@@ -24,7 +23,7 @@ def smartSplit(s):
       ret.append(' '.join(cur))
       cur = []
   return ret
-      
+
 class Node(object):
   def __init__(self):
     self.children = {}
@@ -33,7 +32,8 @@ class Node(object):
   def insert(self, path, value):
     if path == []:
       if self.value is not None:
-        raise RuntimeError('path is a duplicate: {} {}: {}'.format(path, value, self.value))
+        raise RuntimeError(
+            'path is a duplicate: {} {}: {}'.format(path, value, self.value))
       self.value = value
       return
 
@@ -95,24 +95,32 @@ class Node(object):
       fcn(c)
       self.children[c].walkKeys(fcn)
 
+  def dumpTable(self, indent=0):
+    for c in sorted(self.children):
+      print '<tr><td>{}</td></tr>'.format(c)
+
 def createPrefixTree(m):
   root = Node()
   for s in m:
     root.insert(smartSplit(s), m[s])
   return root
 
+jobs = set()
+for row in json.load(open('jobs.json')):
+  if row['job'] is None: continue
+  jobs.add(row['job'])
+
 T = {}
 line = 0
 tns = set()
 
-for row in json.load(open('out.json')):
+for row in json.load(open('tests.json')):
   if row['test_name'] is None: continue
   tns.add(' '.join(row['test_name'].split()))
 
 for tn in tns:
   if tn is None: continue
   if not tn.startswith('[k8s.io]'): continue
-  # print '{}: {}'.format(line, tn)
   T[tn] = line
   line += 1
 
@@ -136,6 +144,17 @@ print '<ul>'
 for sing in singletons:
   print '<li>{}</li>'.format(sing)
 print '</ul>'
+
+print '<hr>'
+print '<ul>'
+for job in sorted(jobs):
+  print '<li>{}</li>'.format(job)
+print '</ul>'
+
+print '<hr>'
+print '<table border="2">'
+root.children['[k8s.io]'].dumpTable()
+print '</table>'
 
 print """
 <script src="col.js"></script>

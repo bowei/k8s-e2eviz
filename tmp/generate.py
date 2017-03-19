@@ -1,6 +1,9 @@
 #!/usr/bin/env python
+
 import base64
+import hashlib
 import json
+import os
 import subprocess
 import sys
 
@@ -63,11 +66,19 @@ def cleanupQuery(q):
     return ' '.join([x.strip() for x in q.split('\n')])
 
 def runQuery(table, query):
-    query = query.format(**{'table': table})
+    query = cleanupQuery(query.format(**{'table': table}))
+
+    cacheFile = 'cache-{}.json'.format(hashlib.md5(query).hexdigest())
+    if os.path.exists(cacheFile):
+      return json.load(open(cacheFile))
+
     output = subprocess.check_output([
         'bq', '--project', 'k8s-gubernator', '--format', 'json',
         'query', '--max_rows', str(LIMIT),
-        cleanupQuery(query)])
+        query])
+    with open(cacheFile, 'w') as fh:
+      fh.write(output)
+
     return json.loads(output)
 
 def gnuplotXY(title, XY, UV, topline):
