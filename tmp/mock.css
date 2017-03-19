@@ -1,0 +1,46 @@
+html, body {
+    height: 100%;
+    margin: 0px;
+}
+
+div#topBar {
+    background-color: #4f9;
+}
+
+div#browserRegion {
+    height: 35%;
+    background-color: #0dd;
+    overflow: scroll;
+    border-bottom: solid 2px;
+}
+
+div#contentRegion {
+    height: 65%;
+    background-color: #dd0;
+    overflow: scroll;
+}
+
+.timeline-graph {
+    padding: 0;
+}
+
+.timeline-cell-group {
+    display: inline-block;
+    flex-direction: row;
+    margin: 0px;
+    background-color: #d08;
+    border-left: solid 1px;
+    border-right: solid 1px;
+    padding-left: 3px;
+    padding-right: 3px;
+}
+
+.timeline-cell-block {
+    display: inline-block;
+    padding: 2px;
+}
+
+.timeline-cell-label {
+    text-align: center;
+    font-size: 10pt;
+}
