@@ -74,6 +74,7 @@ html, body {
 }
 
 #results {
+    background-color: #eee;
 }
 
 #results tr:nth-child(even) {
