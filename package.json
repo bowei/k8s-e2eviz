@@ -1,0 +1,12 @@
+{
+    "name": "k8s-testviz",
+    "description": "test result olap-like browser",
+    "version" : "0.1.0",
+    "license": "Apache 2.0",
+    "dependencies": {
+        
+    },
+    "devDependencies": {
+        
+    }
+}   
