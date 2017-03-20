@@ -4,15 +4,15 @@ class Node {
         this.label = label;
         this.parent = null;
         this.data = null;
-
+        
         this.li = null;
     }
-
+    
     addChild(label, child) {
         child.parent = this;
         this.children.set(label, child);
     }
-
+    
     // walk(parent, node)
     walk(fn) {
         fn(this);
@@ -20,7 +20,7 @@ class Node {
             value.walk(fn);
         });
     }
-
+    
     // fn (val, node): val
     fold(val, fn) {
         val = fn(val, this);
@@ -29,41 +29,41 @@ class Node {
         });
         return val;
     }
-
+    
     prefix() {
-	    var prefix = this.label;
-
-	    var cur = this.parent;
-	    while (cur && cur.label) {
-		    prefix = cur.label + ' ' + prefix;
-		    cur = cur.parent;
-	    }
-	    return prefix;
+        var prefix = this.label;
+        
+        var cur = this.parent;
+        while (cur && cur.label) {
+            prefix = cur.label + ' ' + prefix;
+            cur = cur.parent;
+        }
+        return prefix;
     }
-
+    
     size() {
         return this.fold(0, (val, node) => {
             return val + (node.data ? 1 : 0);
         });
     }
-
+    
     // optimize reduces the size and depth of the tree.
     // - removes singleton children.
     optimize() {
         this.children.forEach((value) => {
             value.optimize();
         })
-
+        
         if (this.children.size == 1 && !this.data && this.parent) {
             var child = Array.from(this.children.values())[0];
-
+            
             this.parent.children.delete(this.label);
-
+            
             // Pull the child node into this node.
             this.children = child.children;
-	    this.children.forEach((v) => {
-	        v.parent = this;
-	    });
+            this.children.forEach((v) => {
+                v.parent = this;
+            });
 
             this.label = this.label + ' ' + child.label;
             this.parent.children.set(this.label, this);
@@ -84,12 +84,12 @@ class Node {
             .toggle());
 
         if (this.children.size > 0) {
-            var view = $('<div>').html('[view]').addClass('browser-tree-item-view');
+            var view = $('<div>').addClass('browser-tree-item-view').html('[view]');
             li.append(view);
             view.click(() => {
                 console.log('view', this);
-	        // XXX
-		showReport(this.prefix());
+                // XXX
+                showReport(this.prefix());
                 return false;
             });
         }
@@ -198,4 +198,9 @@ function splitTestDescription(desc) {
     }
 
     return ret;
+}
+
+// split a job name.
+function splitJob(job) {
+    return job.split(/-/);
 }

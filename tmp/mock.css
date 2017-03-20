@@ -1,22 +1,41 @@
 html, body {
     height: 100%;
     margin: 0px;
+    font-family: 'Roboto Condensed', sans-serif;
 }
 
-div#topBar {
+#topBar {
     background-color: #1f4;
 }
 
-div#browserRegion {
+#browser {
     height: 30%;
-    background-color: #0dd;
     overflow: scroll;
-    border-bottom: solid 2px;
+    resize: vertical;
 }
 
-div#contentRegion {
+#browserRegion {
+    height: 100%;
+    width: 50%;
+    background-color: #aff;
+    overflow: scroll;
+    float: left;
+}
+
+#jobBrowserRegion {
+    height: 100%;
+    width: 50%;
+    background-color: #faf;
+    overflow: scroll;
+    float: left;
+}
+
+.clear {
+    float: clear;
+}
+
+#contentRegion {
     height: 70%;
-    background-color: #dd0;
     overflow: scroll;
 }
 
@@ -55,7 +74,6 @@ div#contentRegion {
 }
 
 #results {
-    background-color: #95a;
 }
 
 #results tr:nth-child(even) {
@@ -78,7 +96,7 @@ div#contentRegion {
     display: inline-block;
     flex-direction: row;
     margin: 0px;
-    background-color: #d08;
+    background-color: #aaa;
     border-left: solid 1px;
     border-right: solid 1px;
     padding-left: 3px;

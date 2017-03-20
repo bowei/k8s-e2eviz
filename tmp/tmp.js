@@ -2,10 +2,15 @@
 var pt = new PrefixTree();
 
 var allTests = new Set();
+var allJobs = new Set();
 
 DATA.forEach((v) => {
-	if (allTests.has(v.test)) { return; }
-	allTests.add(v.test);
+	if (! allTests.has(v.test)) { 
+		allTests.add(v.test);
+	}
+	if (! allJobs.has(v.job)) {
+		allJobs.add(v.job);
+	}
 });
 
 allTests.forEach((v) => {
@@ -13,11 +18,20 @@ allTests.forEach((v) => {
         pt.add(splitTestDescription(v), v);
     }
 });
-
 pt.optimize();
 $('#browserRegion').append(pt.asHTMLUL());
 
-function makeTestReport(prefix) {
+var pt = new PrefixTree();
+allJobs.forEach((v) => {
+	console.log(v);
+    if (v) {
+        pt.add(splitJob(v), v);
+    }
+});
+pt.optimize();
+$('#jobBrowserRegion').append(pt.asHTMLUL());
+
+function makeTestReport(testPrefix, jobPrefix) {
 	var br = new TestReport('testGroup', 0, 0);
 	
 	// job -> [tests]
@@ -26,8 +40,10 @@ function makeTestReport(prefix) {
 	// filter by test prefix, group by job
 	DATA.forEach((row) => {
 		testName = row.test.split(/\s+/).join(' ');
+        // flexible filter expression
+		if (testPrefix && ! testName.startsWith(testPrefix)) { return; }
+		if (jobPrefix && ! row.job.startsWith(jobPrefix)) { return; }
 
-		if (! testName.startsWith(prefix)) { return; }
 		if (! results.has(row.job)) {
 			results.set(row.job, new AggregateTestResult(row.job, [], row.job));
 		}
@@ -57,15 +73,17 @@ function makeTestReport(prefix) {
 	return br;
 }
 
-function showReport(prefix) {
-	console.log('showReport', prefix);
+function showReport(testPrefix, jobPrefix) {
+	console.log('showReport', testPrefix);
 	$('#contentRegion').html('');
 
-	if (prefix !== '') {
-		$('#contentRegion').append($('<h3>').html('Report for /'+prefix+'/'));
+	if (testPrefix !== '') {
+		$('#contentRegion').append($('<h3>').html('Report for /'+testPrefix+'/'));
 	}
 
-	$('#contentRegion').append(makeTestReport(prefix).asHTMLTable());
+	$('#contentRegion').append(makeTestReport(testPrefix).asHTMLTable());
 }
 
 showReport('');
+
+$("#browserRegion").resizable();
