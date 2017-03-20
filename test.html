@@ -1,0 +1,19 @@
+<!DOCTYPE HTML>
+
+<div id='x'></div>
+
+<script src="https://code.jquery.com/jquery-3.2.0.min.js"
+	integrity="sha256-JAW99MJVpJBGcbzEuXk4Az05s/XyDdBomFqNlM3ic+I="
+	crossorigin="anonymous"></script>
+<script src="output/prefixtree.js"></script>
+<script src="output/browser.js"></script>
+<script>
+
+var pt = new prefixtree.Tree();
+pt.add(['a', 'b'], 'foo');
+pt.add(['a', 'c'], 'bar');
+pt.add(['a'], 'top');
+
+$('#x').append(browser.makeTree(pt));
+
+</script>
