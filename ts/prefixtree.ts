@@ -1,19 +1,32 @@
+/*
+Copyright 2017 The Kubernetes Authors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
 namespace prefixtree {
 
-class Node<T> {
-    public children: Map<String, Node<T>>;
-    public label: String;
+export class Node<T> {
+    public children: Map<string, Node<T>>;
     public parent: Node<T>;
     public data: T;
     
-    constructor(label: String) {
-        this.children = new Map<String, Node<T>>();
-        this.label = label;
+    constructor(public uid: number, public label: string) {
+        this.children = new Map<string, Node<T>>();
         this.parent = null;
         this.data = null;
     }
     
-    addChild(label: String, child: Node<T>) {
+    addChild(label: string, child: Node<T>) {
         child.parent = this;
         this.children.set(label, child);
     }
@@ -33,7 +46,7 @@ class Node<T> {
         return val;
     }
     
-    prefix() : String {
+    prefix() : string {
         let prefix = this.label;
         let cur = this.parent;
         
@@ -74,87 +87,29 @@ class Node<T> {
             this.data = child.data;
         }
     }
-    /*
-    asHTMLLI() {
-        let label = this.label;
-        if (this.size() > 1) {
-            label +=  ' (items ' + this.size() + ')';
-        }
-        
-        let li = ($('<li>').addClass('browser-tree-item')
-        .append($('<div>')
-        .html(label)
-        .addClass('browser-tree-label'))
-        .toggle());
-        
-        if (this.children.size > 0) {
-            let view = $('<div>').addClass('browser-tree-item-view').html('[view]');
-            li.append(view);
-            view.click(() => {
-                console.log('view', this);
-                // XXX
-                showReport(this.prefix());
-                return false;
-            });
-        }
-        
-        if (this.data) {
-            let data = $('<div>').addClass('browser-tree-item-data');
-            li.append(data);
-            data.html('[data]');
-            
-            data.click(() => {
-                console.log('data', this);
-                return false;
-            });
-        }
-        
-        li.click((event) => {
-            this.children.forEach((value) => {
-                value.li.toggle('fast');
-            });
-            return false;
-        });
-        
-        this.li = li;
-        
-        if (this.children.size > 0) {
-            let ul = $('<ul>').addClass('browser-tree-child-list');
-            this.addChildrenLI(ul);
-            li.append(ul);
-        }
-        return li;
-    }
-    
-    addChildrenLI(ul) {
-        Array.from(this.children.keys()).sort((a, b) => {
-            return a.localeCompare(b);
-        }).forEach((label) => {
-            let v = this.children.get(label);
-            ul.append(v.asHTMLLI());
-        })
-        return ul;
-    }*/
 }
 
 export class Tree<T> {
     public root: Node<T>;
-    
+    private nextUID: number;
+
     constructor() {
-        this.root = new Node<T>(null);
+        this.root = new Node<T>(0, null);
+        this.nextUID = 1;
     }
     
     walk(fn) {
         this.root.walk(fn);
     }
     
-    add(path: [String], data:T) {
+    add(path: [string], data:T) {
         let cur = this.root;
         for (let i=0; i<path.length; ++i) {
             if (cur.children.has(path[i])) {
                 cur = cur.children.get(path[i]);
             } else {
-                let node = new Node<T>(path[i]);
+                let node = new Node<T>(this.nextUID, path[i]);
+                this.nextUID++;
                 cur.addChild(path[i], node);
                 cur = node;
             }
@@ -165,15 +120,6 @@ export class Tree<T> {
     optimize() {
         this.root.optimize();
     }
-    /*
-    asHTMLUL() {
-        let ul = $('<ul>');
-        this.root.addChildrenLI(ul).addClass('browser-tree-top-list');
-        this.root.children.forEach((v) => {
-            v.li.toggle();
-        })
-        return ul;
-    }*/
 }
 
 /**
@@ -193,7 +139,7 @@ export class Visitor<T> {
         });
     }
 
-    visitChild(node: Node<T>, key: String) {
+    visitChild(node: Node<T>, key: string) {
         this.visitNode(node);
     }
 }
