@@ -1,0 +1,7 @@
+{
+    "vsicons.presets.angular": false,
+    "files.exclude":{
+        "ts/**/*.js": true,
+        "ts/**/*.map": true
+    }
+}
